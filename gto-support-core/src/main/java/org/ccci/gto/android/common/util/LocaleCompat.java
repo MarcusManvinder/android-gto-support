@@ -207,8 +207,8 @@ public class LocaleCompat {
             final Locale.Builder builder = new Locale.Builder();
             builder.setLocale(locale).clearExtensions();
             locales.add(builder.setVariant(null).build());
-            locales.add(builder.setScript(null).build());
             locales.add(builder.setRegion(null).build());
+            locales.add(builder.setScript(null).build());
 
             // return the locales as an array
             return locales.toArray(new Locale[locales.size()]);
