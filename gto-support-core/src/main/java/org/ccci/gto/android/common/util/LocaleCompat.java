@@ -36,14 +36,7 @@ public class LocaleCompat {
 
     @NonNull
     public static Locale[] getFallbacks(final Locale... locales) {
-        final LinkedHashSet<Locale> outputs = new LinkedHashSet<>();
-
-        // generate fallbacks for all provided locales
-        for (final Locale locale : locales) {
-            Collections.addAll(outputs, getFallbacks(locale));
-        }
-
-        return outputs.toArray(new Locale[outputs.size()]);
+        return COMPAT.getFallbacks(locales);
     }
 
     @VisibleForTesting
@@ -56,6 +49,9 @@ public class LocaleCompat {
 
         @NonNull
         Locale[] getFallbacks(@NonNull Locale locale);
+
+        @NonNull
+        Locale[] getFallbacks(@NonNull Locale... locales);
     }
 
     @VisibleForTesting
@@ -106,6 +102,19 @@ public class LocaleCompat {
 
             // return the locales as an array
             return locales.toArray(new Locale[locales.size()]);
+        }
+
+        @NonNull
+        @Override
+        public Locale[] getFallbacks(@NonNull final Locale... locales) {
+            final LinkedHashSet<Locale> outputs = new LinkedHashSet<>();
+
+            // generate fallbacks for all provided locales
+            for (final Locale locale : locales) {
+                Collections.addAll(outputs, getFallbacks(locale));
+            }
+
+            return outputs.toArray(new Locale[outputs.size()]);
         }
     }
 

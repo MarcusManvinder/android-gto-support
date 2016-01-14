@@ -71,10 +71,10 @@ public class LocaleCompatTest {
 
         // test batch fallback resolution
         assertArrayEquals(new Locale[] {Locale.US, Locale.ENGLISH},
-                          LocaleCompat.getFallbacks(Locale.US, Locale.ENGLISH));
+                          compat.getFallbacks(Locale.US, Locale.ENGLISH));
         assertArrayEquals(new Locale[] {Locale.ENGLISH, Locale.US},
-                          LocaleCompat.getFallbacks(Locale.ENGLISH, Locale.US));
+                          compat.getFallbacks(Locale.ENGLISH, Locale.US));
         assertArrayEquals(new Locale[] {Locale.US, Locale.ENGLISH, Locale.CANADA, Locale.CANADA_FRENCH, Locale.FRENCH},
-                          LocaleCompat.getFallbacks(Locale.US, Locale.CANADA, Locale.CANADA_FRENCH));
+                          compat.getFallbacks(Locale.US, Locale.CANADA, Locale.CANADA_FRENCH));
     }
 }
