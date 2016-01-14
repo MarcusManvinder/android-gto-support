@@ -8,6 +8,7 @@ import android.support.annotation.VisibleForTesting;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Set;
 
 public class LocaleCompat {
     private static final Compat COMPAT;
@@ -56,14 +57,70 @@ public class LocaleCompat {
 
     @VisibleForTesting
     static class FroyoCompat implements Compat {
+        private enum State {LANGUAGE, SCRIPT, REGION, VARIANT, EXTENSION, PRIVATE}
+
         @NonNull
         @Override
         public Locale forLanguageTag(@NonNull final String tag) {
             // XXX: we are ignoring grandfathered tags unless we really need that support
             final String[] subtags = tag.split("-");
-            final String language = subtags[0] != null ? subtags[0] : "";
-            final String region = subtags.length > 1 && subtags[1] != null ? subtags[1] : "";
-            return new Locale(language, region);
+            String language = "";
+            String region = "";
+            Set<String> variants = new LinkedHashSet<>();
+            State state = State.LANGUAGE;
+
+            PROCESSING:
+            for (final String subtag : subtags) {
+                switch (state) {
+                    case LANGUAGE:
+                        if (subtag.matches("[a-zA-Z]{2,3}")) {
+                            language = subtag;
+                            state = State.SCRIPT;
+                            break;
+                        }
+                        // break processing unless this is the start of private subtags
+                        if (!subtag.matches("[xX]")) {
+                            break PROCESSING;
+                        }
+                    case SCRIPT:
+                        if (subtag.matches("[a-zA-Z]{4}")) {
+                            // script was not supported by Locale objects pre-lollipop, so let's skip for now
+                            state = State.REGION;
+                            break;
+                        }
+                    case REGION:
+                        if (subtag.matches("([a-zA-Z]{2}|[0-9]{3})")) {
+                            region = subtag;
+                            state = State.VARIANT;
+                            break;
+                        }
+                    case VARIANT:
+                        if (subtag.matches("([a-zA-Z0-9]{5,8}|[0-9][a-zA-Z0-9]{3})")) {
+                            variants.add(subtag.toLowerCase(Locale.ENGLISH));
+                            state = State.VARIANT;
+                            break;
+                        }
+                    case EXTENSION:
+                        if (subtag.matches("[a-zA-Z0-9]")) {
+                            state = "x".equalsIgnoreCase(subtag) ? State.PRIVATE : State.EXTENSION;
+                            break;
+                        }
+                    case PRIVATE:
+                    default:
+                        break PROCESSING;
+                }
+            }
+
+            // covert variants to simple String
+            final StringBuilder variant = new StringBuilder();
+            for (final String subtag : variants) {
+                if (variant.length() > 0) {
+                    variant.append('_');
+                }
+                variant.append(subtag);
+            }
+
+            return new Locale(language, region, variant.toString());
         }
 
         @NonNull
@@ -79,6 +136,12 @@ public class LocaleCompat {
             final String region = locale.getCountry();
             if (region != null && region.length() > 0) {
                 sb.append('-').append(region.toUpperCase(Locale.US));
+            }
+
+            // append the variants
+            final String variant = locale.getVariant();
+            if (variant != null && variant.length() > 0) {
+                sb.append('-').append(variant.replaceAll("_", "-"));
             }
 
             // output the language tag

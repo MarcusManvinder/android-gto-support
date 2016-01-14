@@ -33,6 +33,8 @@ public class LocaleCompatTest {
         builder.put(new Locale("EN", "gb"), "en-GB");
         builder.put(Locale.ENGLISH, "en");
         builder.put(Locale.SIMPLIFIED_CHINESE, "zh-CN");
+        builder.put(new Locale("ru", "143"), "ru-143");
+        builder.put(new Locale("en", "", "scotland_fonipa"), "en-scotland-fonipa");
         LANGUAGETAGS = builder.build();
     }
 
@@ -43,6 +45,8 @@ public class LocaleCompatTest {
         builder.put("en-GB", Locale.UK);
         builder.put("en", Locale.ENGLISH);
         builder.put("EN-us", Locale.US);
+        builder.put("ru-143", new Locale("ru", "143"));
+//        builder.put("zh-x-hui", new Locale.Builder().setLanguage("zh").setExtension('x', "hui").build());
         LOCALES = builder.build();
     }
 
